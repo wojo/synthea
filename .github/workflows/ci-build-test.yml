@@ -1,4 +1,11 @@
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check_java_latest:
@@ -14,12 +21,12 @@ jobs:
           distribution: 'zulu'
 
       - name: Gradle cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-jdk17-${{ hashFiles('**/*.gradle*') }}
+          key: ${{ runner.os }}-gradle-jdk17-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-jdk17
             
@@ -59,20 +66,17 @@ jobs:
           distribution: 'zulu'
 
       - name: Gradle cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-jdk11-${{ hashFiles('**/*.gradle*') }}
+          key: ${{ runner.os }}-gradle-jdk11-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-jdk11
             
       - name: Compile with Gradle
-        run: ./gradlew assemble
-  
-      - name: Test
-        run: ./gradlew check
+        run: ./gradlew assemble check
   
       - name: Code coverage
         uses: codecov/codecov-action@v3
