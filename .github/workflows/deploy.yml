@@ -5,6 +5,8 @@ on:
 
 jobs:
   deploy:
+    # This inherited publisher targets upstream-maintainer resources.
+    if: github.repository == 'synthetichealth/synthea'
     runs-on: ubuntu-latest
     name: Deploy
     steps:
